@@ -76,6 +76,12 @@ The Worker serves the app and `/api/uploads`; SpacetimeDB is a separate service.
 
 Run `pnpm spacetime:generate` after changing the schema or reducer signatures and commit the generated bindings. Vite+ runs its native formatter, linter and typechecking; the optional Vite+ JavaScript lint plugin is not configured.
 
+## Code health
+
+Run `pnpm fallow` to inspect unused code, duplication and complexity. Run `pnpm react:doctor` to scan React code; add `--verbose` for detailed findings. Both tools are pinned as development dependencies. Generated SpacetimeDB bindings are excluded; Fallow also recognizes vinext route entry points and the separately installed SpacetimeDB CLI. Check findings before deleting code: framework conventions can produce false positives.
+
+The **Code health** GitHub Actions workflow runs on pushes to `main` and on pull requests. Fallow reports the full project on `main` and gates newly introduced findings on PRs; React Doctor is advisory on both, scanning only newly introduced findings on PRs. Findings appear in the Actions logs (Fallow's full report also appears in the job summary). These checks do not add PR comments or configure branch protection. React Doctor disables its score/telemetry API and Socket.dev supply-chain check by default; remove `--no-score` or `--no-supply-chain` from its script to opt in.
+
 ## Security and limitations
 
 - Uploads require a valid token, but anyone who knows an upload URL can download its contents; random keys are not authorization. Do not upload sensitive material. The example does not verify that an attachment key belongs to the message author and does not delete orphaned files. Add authorization, lifecycle cleanup, rate limits and content scanning for production.

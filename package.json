@@ -45,7 +45,9 @@
     "spacetime:build": "spacetime build --module-path spacetimedb",
     "spacetime:generate": "spacetime generate --lang typescript --out-dir lib/module_bindings --module-path spacetimedb --yes",
     "spacetime:publish:local": "spacetime publish --server local --module-path spacetimedb vinext-starter --yes",
-    "spacetime:publish": "spacetime publish --server maincloud --module-path spacetimedb vinext-starter"
+    "spacetime:publish": "spacetime publish --server maincloud --module-path spacetimedb vinext-starter",
+    "fallow": "fallow",
+    "react:doctor": "react-doctor . --yes --no-score --no-supply-chain --blocking none"
   },
   "dependencies": {
     "@vinext/cloudflare": "^1.4.0",
@@ -74,6 +76,8 @@
     "@vitejs/plugin-react": "^6.3.0",
     "@vitejs/plugin-rsc": "^0.5.39",
     "cf": "^1.0.0-rc.4",
+    "fallow": "3.48.0",
+    "react-doctor": "0.9.23",
     "tailwindcss": "^4.3.5",
     "typescript": "7.0.2",
     "vite": "catalog:",
