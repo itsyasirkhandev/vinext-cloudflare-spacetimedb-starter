@@ -87,7 +87,17 @@ function SessionGate() {
   if (auth.isLoading)
     return <StatusCard title="Loading session…">Checking SpacetimeAuth.</StatusCard>;
   if (auth.error) {
-    return <StatusCard title="Sign-in failed">{auth.error.message}</StatusCard>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Sign-in failed</CardTitle>
+          <CardDescription>{auth.error.message}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => window.location.assign("/")}>Try again</Button>
+        </CardContent>
+      </Card>
+    );
   }
   if (!hasSession(auth)) {
     return <SignInCard onSignIn={() => void auth.signinRedirect()} />;

@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import type { User } from "oidc-client-ts";
 import { AuthProvider, useAuth } from "react-oidc-context";
 import { SpacetimeDBProvider } from "spacetimedb/react";
 import { publicConfig } from "@/lib/config";
 import { DbConnection, type ErrorContext } from "@/lib/module_bindings";
 
-function onSigninCallback() {
-  // Drop `?code=&state=` and leave /callback once SpacetimeAuth redirects back.
-  window.history.replaceState({}, document.title, "/");
+export function onSigninCallback(user: User | void) {
+  // Redirect callbacks return a user; silent iframe callbacks do not.
+  if (user) window.location.replace("/");
 }
 
 /** Opens the SpacetimeDB connection only after SpacetimeAuth returns an ID token. */

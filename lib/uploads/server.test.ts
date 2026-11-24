@@ -64,6 +64,16 @@ describe("Worker upload and download routes", () => {
     ).toBe(400);
     expect(mocks.put).not.toHaveBeenCalled();
   });
+  it("limits request bodies without a content-length before multipart parsing", async () => {
+    const form = new FormData();
+    form.set("file", png());
+    form.set("extra", "x".repeat(MAX_UPLOAD_BYTES + 64 * 1024));
+    const request = new Request("https://example.test/api/uploads", { method: "POST", body: form });
+    expect(request.headers.get("content-length")).toBeNull();
+    const response = await Effect.runPromise(handleUpload(request));
+    expect(response.status).toBe(413);
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
   it("uploads accepted files with verified ownership and safe content metadata", async () => {
     const response = await Effect.runPromise(handleUpload(uploadRequest(png())));
     expect(response.status).toBe(201);
