@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  # Keep each main push independent while canceling older runs for the same PR.
+  # PR updates replace stale runs; each main push has its own group.
   group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 jobs:
