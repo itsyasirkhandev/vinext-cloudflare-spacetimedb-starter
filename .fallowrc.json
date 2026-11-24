@@ -6,7 +6,8 @@
     "app/**/route.ts",
     "app/robots.ts",
     "app/sitemap.ts",
-    "cloudflare.config.ts"
+    "cloudflare.config.ts",
+    "components/ui/**"
   ],
   "ignorePatterns": ["lib/module_bindings/**"],
   "ignoreDependencies": ["next"],

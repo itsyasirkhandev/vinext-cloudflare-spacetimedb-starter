@@ -9,20 +9,14 @@ import {
   uploadUrl,
 } from "@/lib/uploads/shared";
 
-export class BadRequest extends Data.TaggedError("BadRequest")<{ readonly message: string }> {}
-export class PayloadTooLarge extends Data.TaggedError("PayloadTooLarge")<{}> {}
-export class StorageError extends Data.TaggedError("StorageError")<{ readonly cause: unknown }> {}
+class BadRequest extends Data.TaggedError("BadRequest")<{ readonly message: string }> {}
+class PayloadTooLarge extends Data.TaggedError("PayloadTooLarge")<{}> {}
+class StorageError extends Data.TaggedError("StorageError")<{ readonly cause: unknown }> {}
 
 const json = (body: unknown, status: number) => Response.json(body, { status });
 
-/** Authenticated upload: verify the SpacetimeAuth token, validate, then write to R2. */
-export const handleUpload = (request: Request) =>
-  Effect.gen(function* () {
-    const claims = yield* verifyRequest(request);
-
-    const declaredLength = Number(request.headers.get("content-length") ?? "0");
-    if (declaredLength > MAX_UPLOAD_BYTES + 64 * 1024) return yield* new PayloadTooLarge();
-
+function readUploadFile(request: Request) {
+  return Effect.gen(function* () {
     const form = yield* Effect.tryPromise({
       try: () => request.formData(),
       catch: () => new BadRequest({ message: "Expected multipart/form-data" }),
@@ -31,6 +25,19 @@ export const handleUpload = (request: Request) =>
     if (!(file instanceof File)) return yield* new BadRequest({ message: "Missing `file` field" });
     if (file.size === 0) return yield* new BadRequest({ message: "File is empty" });
     if (file.size > MAX_UPLOAD_BYTES) return yield* new PayloadTooLarge();
+
+    return file;
+  });
+}
+
+/** Authenticated upload: verify the SpacetimeAuth token, validate, then write to R2. */
+export const handleUpload = (request: Request) =>
+  Effect.gen(function* () {
+    const claims = yield* verifyRequest(request);
+    const declaredLength = Number(request.headers.get("content-length") ?? "0");
+    if (declaredLength > MAX_UPLOAD_BYTES + 64 * 1024) return yield* new PayloadTooLarge();
+
+    const file = yield* readUploadFile(request);
 
     const contentType = yield* Schema.decodeUnknownEffect(ContentType)(file.type).pipe(
       Effect.mapError(

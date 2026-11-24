@@ -6,7 +6,7 @@ import {
   UploadResponse,
 } from "@/lib/uploads/shared";
 
-export class UploadRejected extends Data.TaggedError("UploadRejected")<{
+class UploadRejected extends Data.TaggedError("UploadRejected")<{
   readonly message: string;
 }> {}
 

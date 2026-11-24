@@ -1,6 +1,13 @@
 {
   "$schema": "https://react.doctor/schema/config.json",
   "ignore": {
-    "files": ["lib/module_bindings/**"]
+    "files": [
+      "lib/module_bindings/**",
+      ".cloudflare/**",
+      ".vinext/**",
+      ".next/**",
+      "dist/**",
+      "spacetimedb/dist/**"
+    ]
   }
 }

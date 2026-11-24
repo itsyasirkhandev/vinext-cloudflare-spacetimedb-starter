@@ -1,5 +1,6 @@
 import { StarterApp } from "@/components/starter-app";
 import { site } from "@/lib/site";
+import { serializeJsonForHtml } from "@/lib/json-ld";
 
 const stack = [
   ["vinext", "Next.js App Router API on Vite, deployed to Cloudflare Workers"],
@@ -26,8 +27,8 @@ export default function Home() {
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-10 px-6 py-12">
       <script
         type="application/ld+json"
-        // Static, trusted object defined above.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // Escape HTML-significant characters even if metadata later becomes user-controlled.
+        dangerouslySetInnerHTML={{ __html: serializeJsonForHtml(jsonLd) }}
       />
       <header className="flex flex-col gap-4">
         <p className="text-sm font-semibold tracking-wide text-orange-600 uppercase">

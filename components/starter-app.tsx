@@ -29,6 +29,58 @@ function SetupRequired() {
   );
 }
 
+function SignInCard({ onSignIn }: { onSignIn: () => void }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign in to join the realtime guestbook</CardTitle>
+        <CardDescription>
+          SpacetimeAuth hosts the login page. Enable Google under Identity Providers in your
+          SpacetimeAuth project to offer Google sign-up.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={onSignIn}>
+          <LogIn aria-hidden="true" />
+          Continue with SpacetimeAuth
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SignedInSession({
+  user,
+  onSignOut,
+}: {
+  user: NonNullable<ReturnType<typeof useAuth>["user"]>;
+  onSignOut: () => void;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          Signed in as{" "}
+          <span className="font-medium text-foreground">
+            {user.profile.name ?? user.profile.email}
+          </span>
+        </p>
+        <Button variant="outline" size="sm" onClick={onSignOut}>
+          <LogOut aria-hidden="true" />
+          Sign out
+        </Button>
+      </div>
+      <Guestbook idToken={user.id_token ?? ""} />
+    </div>
+  );
+}
+
+function hasSession(auth: ReturnType<typeof useAuth>): auth is ReturnType<typeof useAuth> & {
+  user: NonNullable<ReturnType<typeof useAuth>["user"]>;
+} {
+  return auth.isAuthenticated && !!auth.user;
+}
+
 function SessionGate() {
   const auth = useAuth();
 
@@ -37,43 +89,11 @@ function SessionGate() {
   if (auth.error) {
     return <StatusCard title="Sign-in failed">{auth.error.message}</StatusCard>;
   }
-  if (!auth.isAuthenticated || !auth.user) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign in to join the realtime guestbook</CardTitle>
-          <CardDescription>
-            SpacetimeAuth hosts the login page. Enable Google under Identity Providers in your
-            SpacetimeAuth project to offer Google sign-up.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => void auth.signinRedirect()}>
-            <LogIn aria-hidden="true" />
-            Continue with SpacetimeAuth
-          </Button>
-        </CardContent>
-      </Card>
-    );
+  if (!hasSession(auth)) {
+    return <SignInCard onSignIn={() => void auth.signinRedirect()} />;
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
-          Signed in as{" "}
-          <span className="font-medium text-foreground">
-            {auth.user.profile.name ?? auth.user.profile.email}
-          </span>
-        </p>
-        <Button variant="outline" size="sm" onClick={() => void auth.signoutRedirect()}>
-          <LogOut aria-hidden="true" />
-          Sign out
-        </Button>
-      </div>
-      <Guestbook idToken={auth.user.id_token ?? ""} />
-    </div>
-  );
+  return <SignedInSession user={auth.user} onSignOut={() => void auth.signoutRedirect()} />;
 }
 
 export function StarterApp() {

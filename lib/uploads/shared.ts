@@ -11,7 +11,7 @@ export const ALLOWED_CONTENT_TYPES = {
   "application/pdf": "pdf",
 } as const;
 
-export type AllowedContentType = keyof typeof ALLOWED_CONTENT_TYPES;
+type AllowedContentType = keyof typeof ALLOWED_CONTENT_TYPES;
 
 /** Must match `ATTACHMENT_KEY_PATTERN` in spacetimedb/src/index.ts. */
 export const UPLOAD_KEY_PATTERN =
@@ -21,7 +21,7 @@ export const ContentType = Schema.Literals(
   Object.keys(ALLOWED_CONTENT_TYPES) as [AllowedContentType, ...AllowedContentType[]],
 );
 
-export const UploadKey = Schema.String.check(Schema.isPattern(UPLOAD_KEY_PATTERN));
+const UploadKey = Schema.String.check(Schema.isPattern(UPLOAD_KEY_PATTERN));
 
 export const UploadResponse = Schema.Struct({
   key: UploadKey,

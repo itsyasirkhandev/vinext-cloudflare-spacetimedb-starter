@@ -2,12 +2,17 @@ import { Data, Effect } from "effect";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { publicConfig } from "@/lib/config";
 
-export class MissingToken extends Data.TaggedError("MissingToken")<{}> {}
-export class AuthNotConfigured extends Data.TaggedError("AuthNotConfigured")<{}> {}
-export class InvalidToken extends Data.TaggedError("InvalidToken")<{ readonly cause: unknown }> {}
+class MissingToken extends Data.TaggedError("MissingToken")<{}> {}
+class AuthNotConfigured extends Data.TaggedError("AuthNotConfigured")<{}> {}
+class InvalidToken extends Data.TaggedError("InvalidToken")<{ readonly cause: unknown }> {}
 
 // Cached per Worker isolate; jose refreshes keys when it sees an unknown `kid`.
 const jwks = createRemoteJWKSet(new URL(`${publicConfig.spacetimeAuthAuthority}/jwks`));
+
+function readBearerToken(request: Request): string {
+  const header = request.headers.get("authorization") ?? "";
+  return header.startsWith("Bearer ") ? header.slice("Bearer ".length).trim() : "";
+}
 
 /**
  * Verifies a SpacetimeAuth ID token from `Authorization: Bearer <token>`:
@@ -18,8 +23,7 @@ export const verifyRequest = (request: Request) =>
     const clientId = publicConfig.spacetimeAuthClientId;
     if (!clientId) return yield* new AuthNotConfigured();
 
-    const header = request.headers.get("authorization") ?? "";
-    const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length).trim() : "";
+    const token = readBearerToken(request);
     if (!token) return yield* new MissingToken();
 
     const { payload } = yield* Effect.tryPromise({
