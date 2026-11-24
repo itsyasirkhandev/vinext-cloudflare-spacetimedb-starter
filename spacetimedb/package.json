@@ -1,0 +1,17 @@
+{
+  "name": "@starter/spacetimedb-module",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "spacetime build",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "spacetimedb": "2.16.1"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite-plus": "catalog:"
+  }
+}
