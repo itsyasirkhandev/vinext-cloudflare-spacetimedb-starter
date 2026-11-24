@@ -2,7 +2,7 @@
 
 import { Effect } from "effect";
 import { Paperclip, Send } from "lucide-react";
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent, type RefObject } from "react";
 import type { Identity } from "spacetimedb";
 import { useReducer, useSpacetimeDB, useTable } from "spacetimedb/react";
 import { MessageItem } from "@/components/guestbook-message";
@@ -38,6 +38,7 @@ function GuestbookFields({
   setText,
   setFile,
   fileInputId,
+  fileInputRef,
   busy,
   isActive,
 }: {
@@ -45,6 +46,7 @@ function GuestbookFields({
   setText: (value: string) => void;
   setFile: (value: File | null) => void;
   fileInputId: string;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   busy: boolean;
   isActive: boolean;
 }) {
@@ -69,6 +71,7 @@ function GuestbookFields({
         </label>
         <input
           id={fileInputId}
+          ref={fileInputRef}
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
           className="text-sm"
@@ -102,6 +105,7 @@ function GuestbookForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,6 +117,7 @@ function GuestbookForm({
       await sendMessage(buildMessage(text, file, attachment));
       setText("");
       setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (cause) {
       setError(errorMessage(cause));
     } finally {
@@ -127,6 +132,7 @@ function GuestbookForm({
         setText={setText}
         setFile={setFile}
         fileInputId={fileInputId}
+        fileInputRef={fileInputRef}
         busy={busy}
         isActive={isActive}
       />

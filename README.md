@@ -13,7 +13,7 @@ A TypeScript starter for a realtime guestbook using **vinext** (the Next.js API 
 
 ## Prerequisites
 
-- Node.js 22 or later (Node 24 recommended), pnpm 10.34.9, and the [SpacetimeDB CLI](https://spacetimedb.com/docs/quickstarts/typescript/).
+- Node.js 22.18+ on the 22.x line, 24.11+ on the 24.x line, or 26+ (Node 24 recommended), pnpm 10.34.9, and the [SpacetimeDB CLI](https://spacetimedb.com/docs/quickstarts/typescript/).
 - A [SpacetimeDB Maincloud](https://spacetimedb.com/) account and a SpacetimeAuth project/client with Google enabled for interactive sign-in. SpacetimeAuth is beta.
 - A Cloudflare account with Workers and R2 enabled for deployment. Local development uses a simulated R2 bucket.
 

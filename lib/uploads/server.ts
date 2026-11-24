@@ -15,11 +15,44 @@ class StorageError extends Data.TaggedError("StorageError")<{ readonly cause: un
 
 const json = (body: unknown, status: number) => Response.json(body, { status });
 
+const MAX_REQUEST_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
+
+async function boundedFormRequest(request: Request): Promise<Request> {
+  const reader = request.body?.getReader();
+  if (!reader) throw new BadRequest({ message: "Expected multipart/form-data" });
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_REQUEST_BYTES) {
+      void reader.cancel().catch(() => {});
+      throw new PayloadTooLarge();
+    }
+    chunks.push(value);
+  }
+  const body = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new Request(request.url, {
+    method: "POST",
+    headers: { "content-type": request.headers.get("content-type") ?? "" },
+    body,
+  });
+}
+
 function readUploadFile(request: Request) {
   return Effect.gen(function* () {
     const form = yield* Effect.tryPromise({
-      try: () => request.formData(),
-      catch: () => new BadRequest({ message: "Expected multipart/form-data" }),
+      try: async () => (await boundedFormRequest(request)).formData(),
+      catch: (cause) =>
+        cause instanceof PayloadTooLarge
+          ? cause
+          : new BadRequest({ message: "Expected multipart/form-data" }),
     });
     const file = form.get("file");
     if (!(file instanceof File)) return yield* new BadRequest({ message: "Missing `file` field" });
@@ -35,7 +68,7 @@ export const handleUpload = (request: Request) =>
   Effect.gen(function* () {
     const claims = yield* verifyRequest(request);
     const declaredLength = Number(request.headers.get("content-length") ?? "0");
-    if (declaredLength > MAX_UPLOAD_BYTES + 64 * 1024) return yield* new PayloadTooLarge();
+    if (declaredLength > MAX_REQUEST_BYTES) return yield* new PayloadTooLarge();
 
     const file = yield* readUploadFile(request);
 
