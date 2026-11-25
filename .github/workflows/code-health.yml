@@ -30,9 +30,10 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           BASE_REF: ${{ github.base_ref }}
-        run: pnpm exec fallow audit --base "origin/$BASE_REF"
+        run: pnpm exec fallow audit --base "origin/$BASE_REF" --worsened error
       - name: Report full project health on main
         if: github.event_name == 'push'
+        shell: bash
         run: pnpm exec fallow --format github-summary | tee -a "$GITHUB_STEP_SUMMARY"
 
   react-doctor:
@@ -48,7 +49,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Review new React findings on pull requests
+      - name: Block new React findings on pull requests
         if: github.event_name == 'pull_request'
         env:
           BASE_REF: ${{ github.base_ref }}

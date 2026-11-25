@@ -11,5 +11,11 @@
   ],
   "ignorePatterns": ["lib/module_bindings/**"],
   "ignoreDependencies": ["next"],
-  "ignoreBinaries": ["spacetime"]
+  "ignoreBinaries": ["spacetime"],
+  "rules": {
+    "introduced-clone-group": "error",
+    "weakened-tests": "error",
+    "added-suppression": "error",
+    "test-only-branch": "error"
+  }
 }
