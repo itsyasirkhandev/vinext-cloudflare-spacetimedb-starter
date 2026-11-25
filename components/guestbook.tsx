@@ -36,7 +36,6 @@ function inputDisabled(isActive: boolean, busy: boolean) {
 function GuestbookFields({
   text,
   setText,
-  setFile,
   fileInputId,
   fileInputRef,
   busy,
@@ -44,7 +43,6 @@ function GuestbookFields({
 }: {
   text: string;
   setText: (value: string) => void;
-  setFile: (value: File | null) => void;
   fileInputId: string;
   fileInputRef: RefObject<HTMLInputElement | null>;
   busy: boolean;
@@ -75,7 +73,6 @@ function GuestbookFields({
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
           className="text-sm"
-          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
           disabled={disabled}
         />
         <Button type="submit" disabled={disabled || !text.trim()} className="ml-auto">
@@ -101,7 +98,6 @@ function GuestbookForm({
   }) => Promise<void>;
 }) {
   const [text, setText] = useState("");
-  const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputId = useId();
@@ -110,13 +106,13 @@ function GuestbookForm({
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!text.trim()) return;
+    const file = fileInputRef.current?.files?.[0] ?? null;
     setBusy(true);
     setError(null);
     try {
       const attachment = await uploadSelectedFile(file, idToken);
       await sendMessage(buildMessage(text, file, attachment));
       setText("");
-      setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (cause) {
       setError(errorMessage(cause));
@@ -130,7 +126,6 @@ function GuestbookForm({
       <GuestbookFields
         text={text}
         setText={setText}
-        setFile={setFile}
         fileInputId={fileInputId}
         fileInputRef={fileInputRef}
         busy={busy}

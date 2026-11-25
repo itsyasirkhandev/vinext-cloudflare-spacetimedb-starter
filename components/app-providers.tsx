@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useSyncExternalStore, type ReactNode } from "react";
 import type { User } from "oidc-client-ts";
 import { AuthProvider, useAuth } from "react-oidc-context";
 import { SpacetimeDBProvider } from "spacetimedb/react";
@@ -39,13 +39,13 @@ function SpacetimeConnection({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Browser-only providers. `oidc-client-ts` needs `window` and `sessionStorage`,
- * so nothing renders until after hydration.
- */
+const subscribeToHydration = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+/** Keep the fallback on the server and during hydration; OIDC reads browser storage. */
 export function AppProviders({ children, fallback }: { children: ReactNode; fallback: ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(subscribeToHydration, getClientSnapshot, getServerSnapshot);
 
   const oidc = useMemo(
     () =>

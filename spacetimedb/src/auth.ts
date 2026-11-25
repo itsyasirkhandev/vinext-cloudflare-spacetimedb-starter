@@ -35,7 +35,8 @@ export function requireSpacetimeAuth(
   if (jwt.issuer !== SPACETIMEAUTH_ISSUER) {
     throw new SenderError("Unauthorized: unexpected token issuer");
   }
-  if (!jwt.audience.some((aud) => allowedClientIds.includes(aud))) {
+  const allowedAudiences = new Set(allowedClientIds);
+  if (!jwt.audience.some((aud) => allowedAudiences.has(aud))) {
     throw new SenderError("Unauthorized: token was issued for a different client");
   }
   return jwt;

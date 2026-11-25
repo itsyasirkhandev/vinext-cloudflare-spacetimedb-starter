@@ -2,6 +2,7 @@ import { ConnectionId, type Identity } from "spacetimedb";
 import { createModuleTestHarness, TestAuth } from "spacetimedb/server/test-utils";
 import { describe, expect, it, vi } from "vite-plus/test";
 
+import { requireSpacetimeAuth } from "./auth";
 import spacetime, * as moduleExports from "./index";
 
 const CLIENT_ID = "client_test";
@@ -70,6 +71,19 @@ describe("auth gate", () => {
     expect(() => test.withReducerTx(auth, (ctx) => moduleExports.onConnect(ctx, {}))).toThrow(
       "different client",
     );
+  });
+
+  it("accepts a token when one of several audiences exactly matches the configured client", () => {
+    const test = newHarness();
+    const alice = connect(test, signedIn("alice", { aud: ["client_other", CLIENT_ID] }));
+    expect(test.db.user.identity.find(alice)).toMatchObject({ online: true });
+  });
+
+  it("rejects even a matching token when the caller passes an empty allowlist", () => {
+    const test = newHarness();
+    expect(() =>
+      test.withReducerTx(signedIn("alice"), (ctx) => requireSpacetimeAuth(ctx.senderAuth.jwt, [])),
+    ).toThrow("Server misconfigured");
   });
 });
 
