@@ -47,7 +47,7 @@
     "spacetime:publish:local": "spacetime publish --server local --module-path spacetimedb vinext-starter --yes",
     "spacetime:publish": "spacetime publish --server maincloud --module-path spacetimedb vinext-starter",
     "fallow": "fallow",
-    "react:doctor": "react-doctor . --yes --no-score --no-supply-chain --blocking none"
+    "react:doctor": "react-doctor . --yes --no-score --no-supply-chain --blocking warning"
   },
   "dependencies": {
     "@vinext/cloudflare": "^1.4.0",
